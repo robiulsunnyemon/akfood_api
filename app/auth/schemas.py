@@ -34,3 +34,9 @@ class TokenResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+class GoogleLoginRequest(BaseModel):
+    email: EmailStr
+    first_name: str
+    last_name: str
+    id_token: str

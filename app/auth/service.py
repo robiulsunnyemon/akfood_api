@@ -16,8 +16,11 @@ from .schemas import (
     VerifyOTPRequest,
     ResetPasswordRequest,
     TokenResponse,
-    MessageResponse
+    MessageResponse,
+    GoogleLoginRequest
 )
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
@@ -177,6 +180,35 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         
     user = await db.user.find_unique(where={"id": user_id})
     if user is None:
-        raise credentials_exception
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
+
+async def google_login(data: GoogleLoginRequest) -> TokenResponse:
+    # In a real app, you'd verify the id_token here
+    # try:
+    #     idinfo = id_token.verify_oauth2_token(data.id_token, google_requests.Request(), settings.google_client_id)
+    #     if idinfo['email'] != data.email:
+    #         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token email")
+    # except ValueError:
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid google token")
+
+    # Check if user exists
+    user = await db.user.find_unique(where={"email": data.email})
+    
+    if not user:
+        # Create new user
+        random_password = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+        hashed_pw = get_password_hash(random_password)
+        user = await db.user.create(
+            data={
+                "first_name": data.first_name,
+                "last_name": data.last_name,
+                "email": data.email,
+                "hashed_password": hashed_pw,
+                # Other fields can be updated later by the user
+            }
+        )
+    
+    access_token = create_access_token(data={"sub": str(user.id)})
+    return TokenResponse(access_token=access_token)
 

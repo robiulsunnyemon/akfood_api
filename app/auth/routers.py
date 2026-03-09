@@ -30,3 +30,8 @@ async def verify_otp(data: schemas.VerifyOTPRequest):
 async def reset_password(data: schemas.ResetPasswordRequest):
     """Reset password using the temporary reset token"""
     return await service.reset_password(data)
+
+@router.post("/google-login", response_model=schemas.TokenResponse, status_code=status.HTTP_200_OK)
+async def google_login(data: schemas.GoogleLoginRequest):
+    """Google Login / Instant Registration"""
+    return await service.google_login(data)
