@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from app.db import db
 from app.auth.routers import router as auth_router
 from app.category.routers import router as category_router
+from app.product.routers import router as product_router
 from app.user.routers import router as user_router
 import logging
 
@@ -19,10 +20,22 @@ async def lifespan(app: FastAPI):
     logger.info("Disconnecting from Prisma Database...")
     await db.disconnect()
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(lifespan=lifespan)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify the exact origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth_router)
 app.include_router(category_router)
+app.include_router(product_router)
 app.include_router(user_router)
 
 @app.get("/")

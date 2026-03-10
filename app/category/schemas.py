@@ -9,6 +9,10 @@ class CategoryBase(BaseModel):
 class CategoryCreate(CategoryBase):
     pass
 
+class CategoryUpdate(BaseModel):
+    name: Optional[str] = None
+    image_url: Optional[str] = None
+
 class CategoryRead(CategoryBase):
     id: int
     created_at: datetime

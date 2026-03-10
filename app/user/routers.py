@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File
-from app.auth.service import get_current_user
+from app.auth.service import get_current_user, get_admin_user
 from . import schemas, service
+from typing import List
 
 router = APIRouter(
     prefix="/user",
@@ -11,6 +12,20 @@ router = APIRouter(
 async def read_users_me(current_user = Depends(get_current_user)):
     """Get the currently authenticated user's profile info"""
     return current_user
+
+@router.get("/customers", response_model=schemas.UserListResponse)
+async def get_all_customers(
+    page: int = 1, 
+    size: int = 20, 
+    current_admin = Depends(get_admin_user)
+):
+    """
+    Get all users with the CUSTOMER role with pagination.
+    Only accessible by ADMIN users.
+    """
+    skip = (page - 1) * size
+    customers = await service.get_customers(skip=skip, take=size)
+    return customers
 
 @router.put("/profile", response_model=schemas.UserResponse)
 async def update_my_profile(

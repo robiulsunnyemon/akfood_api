@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 
 class UserResponse(BaseModel):
     id: int
@@ -20,3 +20,7 @@ class UserUpdateProfileRequest(BaseModel):
     district: str
     city: str
     address: str
+
+class UserListResponse(BaseModel):
+    items: List[UserResponse]
+    total: int

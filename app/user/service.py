@@ -59,3 +59,16 @@ async def update_profile_image(user_id: int, file: UploadFile):
     )
     
     return updated_user
+
+async def get_customers(skip: int = 0, take: int = 20):
+    """
+    Fetches all users with the CUSTOMER role with pagination.
+    """
+    total = await db.user.count(where={"role": "CUSTOMER"})
+    items = await db.user.find_many(
+        where={"role": "CUSTOMER"},
+        skip=skip,
+        take=take,
+        order={"created_at": "desc"}
+    )
+    return {"items": items, "total": total}

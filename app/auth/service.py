@@ -73,7 +73,7 @@ async def signup(user_data: SignUpRequest) -> TokenResponse:
     )
 
     access_token = create_access_token(data={"sub": str(new_user.id)})
-    return TokenResponse(access_token=access_token)
+    return TokenResponse(access_token=access_token, user=new_user)
 
 async def login(login_data: LoginRequest) -> TokenResponse:
     user = await db.user.find_first(
@@ -88,7 +88,7 @@ async def login(login_data: LoginRequest) -> TokenResponse:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     
     access_token = create_access_token(data={"sub": str(user.id)})
-    return TokenResponse(access_token=access_token)
+    return TokenResponse(access_token=access_token, user=user)
 
 async def forgot_password(data: ForgotPasswordRequest) -> MessageResponse:
     user = await db.user.find_unique(where={"email": data.email})

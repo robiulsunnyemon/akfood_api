@@ -12,3 +12,13 @@ async def create_category(data: schemas.CategoryCreate) -> schemas.CategoryRead:
             "image_url": data.image_url
         }
     )
+
+async def update_category(id: int, data: schemas.CategoryUpdate) -> schemas.CategoryRead:
+    return await db.category.update(
+        where={"id": id},
+        data=data.model_dump(exclude_unset=True)
+    )
+
+async def delete_category(id: int) -> bool:
+    await db.category.delete(where={"id": id})
+    return True

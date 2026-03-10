@@ -28,9 +28,20 @@ class ResetPasswordRequest(BaseModel):
     new_password: str = Field(min_length=6)
     confirm_password: str
 
+class UserRead(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    email: EmailStr
+    role: str
+
+    class Config:
+        from_attributes = True
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    user: UserRead
 
 class MessageResponse(BaseModel):
     message: str
