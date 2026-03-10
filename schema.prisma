@@ -54,10 +54,11 @@ model Product {
   description String?
   image_url   String?
   category_id Int
-  category    Category           @relation(fields: [category_id], references: [id])
-  variations  ProductVariation[]
-  created_at  DateTime           @default(now())
-  updated_at  DateTime           @updatedAt
+  category         Category           @relation(fields: [category_id], references: [id])
+  variations       ProductVariation[]
+  party_menu_items PartyMenuItem[]
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
 }
 
 model ProductVariation {
@@ -67,4 +68,28 @@ model ProductVariation {
   product_id Int
   product    Product @relation(fields: [product_id], references: [id])
   updated_at DateTime @updatedAt
+}
+
+model PartyMenu {
+  id          Int             @id @default(autoincrement())
+  title       String
+  description String?
+  image_url   String?
+  price       Float
+  category    String?
+  items       PartyMenuItem[]
+  created_at  DateTime        @default(now())
+  updated_at  DateTime        @updatedAt
+}
+
+model PartyMenuItem {
+  id            Int       @id @default(autoincrement())
+  party_menu_id Int
+  party_menu    PartyMenu @relation(fields: [party_menu_id], references: [id], onDelete: Cascade)
+  product_id    Int
+  product       Product   @relation(fields: [product_id], references: [id])
+  created_at    DateTime  @default(now())
+
+  @@index([party_menu_id])
+  @@index([product_id])
 }

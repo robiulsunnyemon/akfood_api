@@ -5,6 +5,7 @@ from app.auth.routers import router as auth_router
 from app.category.routers import router as category_router
 from app.product.routers import router as product_router
 from app.user.routers import router as user_router
+from app.party_menu.routers import router as party_menu_router
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -37,6 +38,7 @@ app.include_router(auth_router)
 app.include_router(category_router)
 app.include_router(product_router)
 app.include_router(user_router)
+app.include_router(party_menu_router)
 
 @app.get("/")
 def read_root():
