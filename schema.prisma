@@ -38,3 +38,11 @@ model OTP {
 
   @@index([email])
 }
+
+model Category {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  image_url  String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
