@@ -25,6 +25,7 @@ model User {
   hashed_password String
   role            Role     @default(CUSTOMER)
   is_active       Boolean  @default(true)
+  cart_items      CartItem[]
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }
@@ -57,17 +58,19 @@ model Product {
   category         Category           @relation(fields: [category_id], references: [id])
   variations       ProductVariation[]
   party_menu_items PartyMenuItem[]
+  cart_items       CartItem[]
   created_at       DateTime           @default(now())
   updated_at       DateTime           @updatedAt
 }
 
 model ProductVariation {
-  id         Int     @id @default(autoincrement())
+  id         Int        @id @default(autoincrement())
   name       String
   price      Float
   product_id Int
-  product    Product @relation(fields: [product_id], references: [id])
-  updated_at DateTime @updatedAt
+  product    Product    @relation(fields: [product_id], references: [id])
+  cart_items CartItem[]
+  updated_at DateTime   @updatedAt
 }
 
 model PartyMenu {
@@ -78,6 +81,7 @@ model PartyMenu {
   price       Float
   category    String?
   items       PartyMenuItem[]
+  cart_items  CartItem[]
   created_at  DateTime        @default(now())
   updated_at  DateTime        @updatedAt
 }
@@ -92,4 +96,31 @@ model PartyMenuItem {
 
   @@index([party_menu_id])
   @@index([product_id])
+}
+
+model CartItem {
+  id            Int      @id @default(autoincrement())
+  user_id       Int
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  product_id    Int?
+  product       Product? @relation(fields: [product_id], references: [id])
+  
+  variation_id  Int?
+  variation     ProductVariation? @relation(fields: [variation_id], references: [id])
+  
+  party_menu_id Int?
+  party_menu    PartyMenu? @relation(fields: [party_menu_id], references: [id])
+  
+  quantity      Int      @default(1)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  @@index([user_id])
+}
+
+model DeliveryArea {
+  id        Int      @id @default(autoincrement())
+  city      String   @unique
+  locations String[]
 }
