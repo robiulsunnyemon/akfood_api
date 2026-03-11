@@ -124,3 +124,8 @@ model DeliveryArea {
   city      String   @unique
   locations String[]
 }
+
+model DeliveryFee {
+  id        Int      @id @default(autoincrement())
+  fee       Float
+}
