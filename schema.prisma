@@ -12,6 +12,15 @@ enum Role {
   ADMIN
 }
 
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
 model User {
   id              Int      @id @default(autoincrement())
   first_name      String
@@ -26,6 +35,7 @@ model User {
   role            Role     @default(CUSTOMER)
   is_active       Boolean  @default(true)
   cart_items      CartItem[]
+  orders          Order[]
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }
@@ -59,18 +69,20 @@ model Product {
   variations       ProductVariation[]
   party_menu_items PartyMenuItem[]
   cart_items       CartItem[]
+  order_items      OrderItem[]
   created_at       DateTime           @default(now())
   updated_at       DateTime           @updatedAt
 }
 
 model ProductVariation {
-  id         Int        @id @default(autoincrement())
-  name       String
-  price      Float
-  product_id Int
-  product    Product    @relation(fields: [product_id], references: [id])
-  cart_items CartItem[]
-  updated_at DateTime   @updatedAt
+  id          Int        @id @default(autoincrement())
+  name        String
+  price       Float
+  product_id  Int
+  product     Product    @relation(fields: [product_id], references: [id])
+  cart_items  CartItem[]
+  order_items OrderItem[]
+  updated_at  DateTime   @updatedAt
 }
 
 model PartyMenu {
@@ -82,6 +94,7 @@ model PartyMenu {
   category    String?
   items       PartyMenuItem[]
   cart_items  CartItem[]
+  order_items OrderItem[]
   created_at  DateTime        @default(now())
   updated_at  DateTime        @updatedAt
 }
@@ -117,6 +130,55 @@ model CartItem {
   updated_at    DateTime @updatedAt
 
   @@index([user_id])
+}
+
+model Order {
+  id                  Int          @id @default(autoincrement())
+  user_id             Int
+  user                User         @relation(fields: [user_id], references: [id])
+  
+  city                String
+  location            String
+  address             String
+  special_instruction String?
+  phone_number        String?       // New field (optional for existing data)
+  payment_method      String       // "Digital Payment" or "Cash on delivery"
+  
+  subtotal            Float
+  delivery_fee        Float
+  total               Float
+  
+  status              OrderStatus  @default(PENDING)
+  
+  items               OrderItem[]
+  
+  created_at          DateTime     @default(now())
+  updated_at          DateTime     @updatedAt
+
+  @@index([user_id])
+}
+
+model OrderItem {
+  id            Int      @id @default(autoincrement())
+  order_id      Int
+  order         Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  
+  product_id    Int?
+  product       Product? @relation(fields: [product_id], references: [id])
+  
+  variation_id  Int?
+  variation     ProductVariation? @relation(fields: [variation_id], references: [id])
+  
+  party_menu_id Int?
+  party_menu    PartyMenu? @relation(fields: [party_menu_id], references: [id])
+  
+  name          String   // Name at the time of order
+  price         Float    // Price at the time of order
+  quantity      Int
+  
+  created_at    DateTime @default(now())
+
+  @@index([order_id])
 }
 
 model DeliveryArea {
