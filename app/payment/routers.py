@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Form, Request
 from fastapi.responses import RedirectResponse
 from typing import List
-from app.auth.routers import get_current_user, get_admin_user
+from app.auth.service import get_current_user, get_admin_user
 from . import service, schemas
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
