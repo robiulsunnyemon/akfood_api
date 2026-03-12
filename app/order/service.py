@@ -90,7 +90,7 @@ async def get_user_orders(user_id: int) -> List[dict]:
         await db.connect()
     orders = await db.order.find_many(
         where={"user_id": user_id},
-        include={"items": True},
+        include={"items": True, "review": True},
         order={"created_at": "desc"}
     )
     return [order.model_dump() for order in orders]
@@ -101,7 +101,8 @@ async def get_all_orders() -> List[dict]:
     orders = await db.order.find_many(
         include={
             "items": True,
-            "user": True
+            "user": True,
+            "review": True
         },
         order={"created_at": "desc"}
     )
@@ -113,7 +114,7 @@ async def update_order_status(order_id: int, status: str) -> Optional[dict]:
     updated = await db.order.update(
         where={"id": order_id},
         data={"status": status},
-        include={"items": True}
+        include={"items": True, "review": True}
     )
     return updated.model_dump() if updated else None
 

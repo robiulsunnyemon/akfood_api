@@ -40,6 +40,8 @@ class ProductRead(ProductBase):
     id: int
     image_url: Optional[str] = None
     variations: List[ProductVariationRead]
+    rating: float
+    review_count: int
     created_at: datetime
     updated_at: datetime
 

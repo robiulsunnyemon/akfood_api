@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import List
 from app.order import service
 from app.order.schemas import OrderCreate, OrderResponse, OrderStatus
@@ -34,7 +34,7 @@ async def get_all_orders(current_user: User = Depends(require_admin)):
 @router.put("/{order_id}/status", response_model=OrderResponse)
 async def update_order_status(
     order_id: int,
-    status: OrderStatus,
+    status: OrderStatus = Query(...),
     current_user: User = Depends(require_admin)
 ):
     updated = await service.update_order_status(order_id, status)

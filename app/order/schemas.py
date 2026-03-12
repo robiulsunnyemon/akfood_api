@@ -47,6 +47,8 @@ class UserShortResponse(BaseModel):
     class Config:
         from_attributes = True
 
+from app.review.schemas import ReviewResponse
+
 class OrderResponse(BaseModel):
     id: int
     user_id: int
@@ -62,6 +64,7 @@ class OrderResponse(BaseModel):
     total: float
     status: OrderStatus
     items: List[OrderItemResponse]
+    review: Optional[ReviewResponse] = None
     created_at: datetime
     updated_at: datetime
 

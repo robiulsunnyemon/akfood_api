@@ -36,6 +36,7 @@ model User {
   is_active       Boolean  @default(true)
   cart_items      CartItem[]
   orders          Order[]
+  reviews         Review[]
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }
@@ -70,6 +71,8 @@ model Product {
   party_menu_items PartyMenuItem[]
   cart_items       CartItem[]
   order_items      OrderItem[]
+  rating           Float              @default(5.0)
+  review_count     Int                @default(0)
   created_at       DateTime           @default(now())
   updated_at       DateTime           @updatedAt
 }
@@ -95,6 +98,8 @@ model PartyMenu {
   items       PartyMenuItem[]
   cart_items  CartItem[]
   order_items OrderItem[]
+  rating       Float           @default(5.0)
+  review_count Int             @default(0)
   created_at  DateTime        @default(now())
   updated_at  DateTime        @updatedAt
 }
@@ -151,11 +156,23 @@ model Order {
   status              OrderStatus  @default(PENDING)
   
   items               OrderItem[]
+  review              Review?
   
   created_at          DateTime     @default(now())
   updated_at          DateTime     @updatedAt
 
   @@index([user_id])
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  user       User     @relation(fields: [user_id], references: [id])
+  order_id   Int      @unique
+  order      Order    @relation(fields: [order_id], references: [id])
+  rating     Int      @default(5)
+  comment    String?
+  created_at DateTime @default(now())
 }
 
 model OrderItem {

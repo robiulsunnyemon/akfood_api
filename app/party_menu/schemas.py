@@ -31,6 +31,8 @@ class PartyMenuUpdate(BaseModel):
 class PartyMenuResponse(PartyMenuBase):
     id: int
     items: List[PartyMenuItemResponse]
+    rating: float
+    review_count: int
     created_at: datetime
     updated_at: datetime
 
