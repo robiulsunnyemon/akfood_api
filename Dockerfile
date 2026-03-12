@@ -31,15 +31,14 @@ RUN poetry install --no-interaction --no-ansi --no-root
 # Copy Prisma schema
 COPY schema.prisma ./
 
-# Generate Prisma Client
-RUN poetry run prisma db push --accept-data-loss && poetry run prisma generate
+# Generate Prisma Client (don't push DB during build)
+RUN poetry run prisma generate
 
 # Copy application code
 COPY . .
 
 # Expose port
-EXPOSE 8001
+EXPOSE 8000
 
 # Command to run the application
-CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
+CMD ["sh", "-c", "poetry run prisma db push --accept-data-loss && poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000"]
