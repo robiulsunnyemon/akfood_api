@@ -7,6 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
 enum Role {
   CUSTOMER
   ADMIN
@@ -154,6 +161,8 @@ model Order {
   total               Float
   
   status              OrderStatus  @default(PENDING)
+  payment_status      PaymentStatus @default(PENDING)
+  transaction_id      String?      @unique
   
   items               OrderItem[]
   review              Review?

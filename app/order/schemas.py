@@ -11,6 +11,12 @@ class OrderStatus(str, Enum):
     DELIVERED = "DELIVERED"
     CANCELLED = "CANCELLED"
 
+class PaymentStatus(str, Enum):
+    PENDING = "PENDING"
+    PAID = "PAID"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+
 class OrderItemCreate(BaseModel):
     product_id: Optional[int] = None
     variation_id: Optional[int] = None
@@ -64,6 +70,8 @@ class OrderResponse(BaseModel):
     delivery_fee: float
     total: float
     status: OrderStatus
+    payment_status: PaymentStatus
+    transaction_id: Optional[str] = None
     items: List[OrderItemResponse]
     review: Optional[ReviewResponse] = None
     created_at: datetime

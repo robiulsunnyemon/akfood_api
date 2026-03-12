@@ -11,6 +11,7 @@ from app.delivery_area.routers import router as delivery_area_router
 from app.delivery_fee.routers import router as delivery_fee_router
 from app.order.routers import router as order_router
 from app.review.routers import router as review_router
+from app.payment.routers import router as payment_router
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -49,6 +50,7 @@ app.include_router(delivery_area_router)
 app.include_router(delivery_fee_router)
 app.include_router(order_router)
 app.include_router(review_router)
+app.include_router(payment_router)
 
 @app.get("/")
 def read_root():
