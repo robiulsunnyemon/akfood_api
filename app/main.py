@@ -13,6 +13,9 @@ from app.order.routers import router as order_router
 from app.review.routers import router as review_router
 from app.payment.routers import router as payment_router
 import logging
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -27,7 +30,7 @@ async def lifespan(app: FastAPI):
     logger.info("Disconnecting from Prisma Database...")
     await db.disconnect()
 
-from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(lifespan=lifespan)
 
