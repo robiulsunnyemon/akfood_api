@@ -82,12 +82,15 @@ async def verify_payment(tran_id: str, val_id: str):
     validation = await ssl_service.validate_payment(val_id)
     
     if validation and validation.get("status") == "VALID":
-        # Update order status
-        await db.order.update(
+        # Update order status to PAID
+        updated_order = await db.order.update(
             where={"transaction_id": tran_id},
             data={
                 "payment_status": "PAID"
             }
         )
+        # Now clear the cart for the user since payment is confirmed
+        if updated_order:
+            await db.cartitem.delete_many(where={"user_id": updated_order.user_id})
         return True
     return False

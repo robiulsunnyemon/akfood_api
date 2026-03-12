@@ -84,8 +84,12 @@ async def create_order(user_id: int, order_data: dict) -> dict:
             include={"items": True}
         )
         
-        # 5. Clear Cart
-        await transaction.cartitem.delete_many(where={"user_id": user_id})
+        # 5. Clear Cart — only for Cash payments.
+        # For Digital Payments, the cart will be cleared AFTER payment is confirmed.
+        # This prevents cart loss when payment fails or is cancelled.
+        payment_method = order_data.get("payment_method", "Cash")
+        if payment_method != "Digital Payment":
+            await transaction.cartitem.delete_many(where={"user_id": user_id})
         
         return new_order.model_dump()
 
