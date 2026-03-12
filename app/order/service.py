@@ -32,17 +32,20 @@ async def create_order(user_id: int, order_data: dict) -> dict:
     for item in cart_items:
         item_name = ""
         item_price = 0.0
+        item_image = ""
         
         if item.party_menu:
             item_name = item.party_menu.title
             item_price = item.party_menu.price
+            item_image = item.party_menu.image_url
         elif item.variation:
             item_name = f"{item.product.name} ({item.variation.name})"
             item_price = item.variation.price
+            item_image = item.product.image_url
         else:
             item_name = item.product.name
-            # Fallback if no variation (though schema usually has variations or party menu)
             item_price = 0.0 
+            item_image = item.product.image_url
 
         subtotal += item_price * item.quantity
         
@@ -52,6 +55,7 @@ async def create_order(user_id: int, order_data: dict) -> dict:
             "party_menu_id": item.party_menu_id,
             "name": item_name,
             "price": item_price,
+            "image_url": item_image,
             "quantity": item.quantity
         })
 
@@ -90,23 +94,58 @@ async def get_user_orders(user_id: int) -> List[dict]:
         await db.connect()
     orders = await db.order.find_many(
         where={"user_id": user_id},
-        include={"items": True, "review": True},
+        include={
+            "items": {
+                "include": {
+                    "product": True,
+                    "party_menu": True
+                }
+            },
+            "review": True
+        },
         order={"created_at": "desc"}
     )
-    return [order.model_dump() for order in orders]
+    
+    result = []
+    for order in orders:
+        order_dict = order.model_dump()
+        for i, item in enumerate(order.items):
+            if not item.image_url:
+                if item.party_menu:
+                    order_dict['items'][i]['image_url'] = item.party_menu.image_url
+                elif item.product:
+                    order_dict['items'][i]['image_url'] = item.product.image_url
+        result.append(order_dict)
+    return result
 
 async def get_all_orders() -> List[dict]:
     if not db.is_connected():
         await db.connect()
     orders = await db.order.find_many(
         include={
-            "items": True,
+            "items": {
+                "include": {
+                    "product": True,
+                    "party_menu": True
+                }
+            },
             "user": True,
             "review": True
         },
         order={"created_at": "desc"}
     )
-    return [order.model_dump() for order in orders]
+    
+    result = []
+    for order in orders:
+        order_dict = order.model_dump()
+        for i, item in enumerate(order.items):
+            if not item.image_url:
+                if item.party_menu:
+                    order_dict['items'][i]['image_url'] = item.party_menu.image_url
+                elif item.product:
+                    order_dict['items'][i]['image_url'] = item.product.image_url
+        result.append(order_dict)
+    return result
 
 async def update_order_status(order_id: int, status: str) -> Optional[dict]:
     if not db.is_connected():

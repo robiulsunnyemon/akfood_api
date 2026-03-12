@@ -32,6 +32,7 @@ class OrderItemResponse(BaseModel):
     party_menu_id: Optional[int] = None
     name: str
     price: float
+    image_url: Optional[str] = None
     quantity: int
 
     class Config:

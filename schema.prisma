@@ -191,6 +191,7 @@ model OrderItem {
   
   name          String   // Name at the time of order
   price         Float    // Price at the time of order
+  image_url     String?  // Image at the time of order
   quantity      Int
   
   created_at    DateTime @default(now())
