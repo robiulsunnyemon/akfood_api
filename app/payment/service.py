@@ -6,30 +6,48 @@ from app.utils.ssl_service import ssl_service
 from app.order.service import get_user_orders
 
 async def get_payment_stats() -> PaymentStats:
-    # In a real app, we would sum up from a Transaction table.
-    # For now, we calculate from PAID orders.
-    # SSL Fee is usually around 2.5% to 3.5%. Let's assume 3.0% for calculation.
-    
-    orders = await db.order.find_many(
-        where={"payment_status": "PAID"}
+    # Get all successful Digital Payments
+    digital_orders = await db.order.find_many(
+        where={
+            "payment_method": "Digital Payment",
+            "payment_status": "PAID"
+        }
     )
     
-    total_paid_amount = sum(order.total for order in orders)
+    # Get all COD orders that are DELIVERED
+    cod_orders = await db.order.find_many(
+        where={
+            "payment_method": "Cash on delivery",
+            "status": "DELIVERED"
+        }
+    )
+    
+    # Calculate online revenue and SSL cost
+    online_revenue = sum(order.total for order in digital_orders)
     ssl_fee_rate = 0.03 # 3%
-    total_ssl_cost = total_paid_amount * ssl_fee_rate
-    net_revenue = total_paid_amount - total_ssl_cost
+    total_ssl_cost = online_revenue * ssl_fee_rate
+    
+    # Calculate offline revenue
+    offline_revenue = sum(order.total for order in cod_orders)
+    
+    # Total revenue is sum of all, minus ssl cost for digital
+    total_revenue = (online_revenue - total_ssl_cost) + offline_revenue
     
     return PaymentStats(
-        platform_earnings=total_paid_amount,
-        total_revenue=net_revenue,
+        total_revenue=total_revenue,
+        offline_revenue=offline_revenue,
+        online_revenue=online_revenue,
         ssl_cost=total_ssl_cost
     )
 
 async def get_all_transactions() -> List[dict]:
-    # We fetch orders that have a transaction_id
+    # We fetch digital orders that have a transaction_id and all COD orders
     orders = await db.order.find_many(
         where={
-            "transaction_id": {"not": None}
+            "OR": [
+                {"transaction_id": {"not": None}},
+                {"payment_method": "Cash on delivery"}
+            ]
         },
         include={"user": True},
         order={"created_at": "desc"}
@@ -37,12 +55,22 @@ async def get_all_transactions() -> List[dict]:
     
     transactions = []
     for order in orders:
+        # Determine display status for COD pending vs delivered etc
+        display_status = order.payment_status
+        if order.payment_method == "Cash on delivery":
+            if order.status == "DELIVERED" or order.payment_status == "PAID":
+                display_status = "PAID"
+            elif order.status == "CANCELLED":
+                display_status = "CANCELLED"
+            else:
+                display_status = "PENDING"
+                
         transactions.append({
             "id": order.id,
             "order_id": order.id,
             "amount": order.total,
-            "transaction_id": order.transaction_id,
-            "status": order.payment_status,
+            "transaction_id": order.transaction_id if order.transaction_id else f"COD_{order.id}",
+            "status": display_status,
             "created_at": order.created_at,
             "customer_name": f"{order.user.first_name} {order.user.last_name}" if order.user else "Unknown"
         })

@@ -3,8 +3,9 @@ from typing import Optional, List
 from datetime import datetime
 
 class PaymentStats(BaseModel):
-    platform_earnings: float
     total_revenue: float
+    offline_revenue: float
+    online_revenue: float
     ssl_cost: float
 
 class TransactionResponse(BaseModel):
