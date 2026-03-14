@@ -1,5 +1,6 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Depends
 from . import schemas, service
+from .service import get_current_user
 
 router = APIRouter(
     prefix="/auth",
@@ -35,3 +36,18 @@ async def reset_password(data: schemas.ResetPasswordRequest):
 async def google_login(data: schemas.GoogleLoginRequest):
     """Google Login / Instant Registration"""
     return await service.google_login(data)
+
+@router.get("/me", response_model=schemas.UserRead)
+async def get_me(current_user=Depends(get_current_user)):
+    """Get current logged in user details"""
+    return current_user
+
+@router.put("/profile", response_model=schemas.UserRead)
+async def update_profile(data: schemas.ProfileUpdateRequest, current_user=Depends(get_current_user)):
+    """Update current user profile"""
+    return await service.update_profile(current_user.id, data)
+
+@router.delete("/account", response_model=schemas.MessageResponse)
+async def delete_account(data: schemas.DeleteAccountRequest, current_user=Depends(get_current_user)):
+    """Permanently delete user account"""
+    return await service.delete_account(current_user.id, data)

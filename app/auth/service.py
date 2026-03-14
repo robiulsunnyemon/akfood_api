@@ -15,7 +15,10 @@ from .schemas import (
     ForgotPasswordRequest,
     VerifyOTPRequest,
     ResetPasswordRequest,
+    ProfileUpdateRequest,
+    DeleteAccountRequest,
     TokenResponse,
+    UserRead,
     MessageResponse,
     GoogleLoginRequest
 )
@@ -129,8 +132,9 @@ async def verify_otp(data: VerifyOTPRequest) -> TokenResponse:
     
     # OPTIONAL: You could delete the OTP immediately to prevent reuse
     # Or keep it until password reset finishes. Let's issue a temporary token.
+    user = await db.user.find_unique(where={"email": data.email})
     reset_token = create_access_token(data={"sub": data.email, "type": "password_reset"}, expires_delta=timedelta(minutes=15))
-    return TokenResponse(access_token=reset_token)
+    return TokenResponse(access_token=reset_token, user=user)
 
 async def reset_password(data: ResetPasswordRequest) -> MessageResponse:
     if data.new_password != data.confirm_password:
@@ -218,5 +222,33 @@ async def google_login(data: GoogleLoginRequest) -> TokenResponse:
         )
     
     access_token = create_access_token(data={"sub": str(user.id)})
-    return TokenResponse(access_token=access_token)
+    return TokenResponse(access_token=access_token, user=user)
+
+async def update_profile(user_id: int, data: ProfileUpdateRequest) -> UserRead:
+    update_data = data.model_dump(exclude_unset=True)
+    if not update_data:
+        user = await db.user.find_unique(where={"id": user_id})
+        return user
+        
+    updated_user = await db.user.update(
+        where={"id": user_id},
+        data=update_data
+    )
+    return updated_user
+
+async def delete_account(user_id: int, data: DeleteAccountRequest) -> MessageResponse:
+    user = await db.user.find_unique(where={"id": user_id})
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        
+    if not verify_password(data.password, user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password")
+        
+    # Option 1: Deactivate account (soft delete)
+    # await db.user.update(where={"id": user_id}, data={"is_active": False})
+    
+    # Option 2: Permanent deletion (requested "permanently Delete your account" in screenshot)
+    await db.user.delete(where={"id": user_id})
+    
+    return MessageResponse(message="Account deleted successfully")
 

@@ -28,11 +28,27 @@ class ResetPasswordRequest(BaseModel):
     new_password: str = Field(min_length=6)
     confirm_password: str
 
+class ProfileUpdateRequest(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    district: Optional[str] = None
+    city: Optional[str] = None
+    address: Optional[str] = None
+
+class DeleteAccountRequest(BaseModel):
+    password: str
+
 class UserRead(BaseModel):
     id: int
     first_name: str
     last_name: str
     email: EmailStr
+    phone_number: Optional[str] = None
+    district: Optional[str] = None
+    city: Optional[str] = None
+    address: Optional[str] = None
+    profile_img_url: Optional[str] = None
     role: str
 
     class Config:
