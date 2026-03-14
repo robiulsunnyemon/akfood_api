@@ -13,6 +13,7 @@ from app.order.routers import router as order_router
 from app.review.routers import router as review_router
 from app.payment.routers import router as payment_router
 from app.dashboard.routers import router as dashboard_router
+from app.slider.routers import router as slider_router
 import logging
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -56,6 +57,7 @@ app.include_router(order_router)
 app.include_router(review_router)
 app.include_router(payment_router)
 app.include_router(dashboard_router)
+app.include_router(slider_router)
 
 @app.get("/")
 def read_root():

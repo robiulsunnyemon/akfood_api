@@ -219,3 +219,13 @@ model DeliveryFee {
   id        Int      @id @default(autoincrement())
   fee       Float
 }
+
+model Slider {
+  id         Int      @id @default(autoincrement())
+  image_url  String
+  title      String?
+  link_url   String?
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
