@@ -1,6 +1,7 @@
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, UploadFile, File
 from . import schemas, service
 from .service import get_current_user
+from app.utils.cloudinary import upload_image
 
 router = APIRouter(
     prefix="/auth",
@@ -46,6 +47,12 @@ async def get_me(current_user=Depends(get_current_user)):
 async def update_profile(data: schemas.ProfileUpdateRequest, current_user=Depends(get_current_user)):
     """Update current user profile"""
     return await service.update_profile(current_user.id, data)
+
+@router.post("/profile-image", response_model=schemas.UserRead)
+async def upload_profile_image(file: UploadFile = File(...), current_user=Depends(get_current_user)):
+    """Upload and update user profile image"""
+    image_url = await upload_image(file, folder="akfood/profiles")
+    return await service.update_profile_image(current_user.id, image_url)
 
 @router.delete("/account", response_model=schemas.MessageResponse)
 async def delete_account(data: schemas.DeleteAccountRequest, current_user=Depends(get_current_user)):

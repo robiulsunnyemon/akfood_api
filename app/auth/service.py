@@ -252,3 +252,10 @@ async def delete_account(user_id: int, data: DeleteAccountRequest) -> MessageRes
     
     return MessageResponse(message="Account deleted successfully")
 
+async def update_profile_image(user_id: int, image_url: str) -> UserRead:
+    updated_user = await db.user.update(
+        where={"id": user_id},
+        data={"profile_img_url": image_url}
+    )
+    return updated_user
+
