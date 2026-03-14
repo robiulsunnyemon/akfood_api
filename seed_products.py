@@ -68,7 +68,8 @@ async def main():
                     "name": name,
                     "description": desc,
                     "image_url": img,
-                    "category_id": cat_id,
+                    "category": {"connect": {"id": cat_id}},
+                    "is_active": True,
                     "variations": {
                         "create": [
                             {"name": "For 1 person", "price": random.randint(10, 50)},

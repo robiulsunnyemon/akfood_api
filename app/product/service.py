@@ -3,8 +3,10 @@ from . import schemas
 from fastapi import HTTPException, status
 
 async def get_all_products(skip: int = 0, take: int = 21):
-    total = await db.product.count()
+    where_input = {"is_active": True}
+    total = await db.product.count(where=where_input)
     items = await db.product.find_many(
+        where=where_input,
         skip=skip,
         take=take,
         include={"variations": True, "category": True},
@@ -29,7 +31,7 @@ async def create_product(data: schemas.ProductCreate):
     return product
 
 async def get_product_by_id(product_id: int):
-    product = await db.product.find_unique(where={"id": product_id}, include={"variations": True})
+    product = await db.product.find_first(where={"id": product_id, "is_active": True}, include={"variations": True})
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     return product
@@ -59,9 +61,10 @@ async def update_product(product_id: int, data: schemas.ProductUpdate):
     return product
 
 async def delete_product(product_id: int):
-    # Variations are automatically deleted if Prisma is configured with OnDelete: Cascade
-    # By default, we might need to delete them manually if not set up in schema.
-    # Prisma db push often handles this if relations are set up.
-    await db.productvariation.delete_many(where={"product_id": product_id})
-    await db.product.delete(where={"id": product_id})
-    return {"message": "Product deleted successfully"}
+    # Instead of deleting variations and the product itself, we perform a soft delete
+    # to maintain data integrity for existing orders and party menus.
+    await db.product.update(
+        where={"id": product_id},
+        data={"is_active": False}
+    )
+    return {"message": "Product soft-deleted successfully"}
