@@ -54,6 +54,19 @@ async def upload_profile_image(file: UploadFile = File(...), current_user=Depend
     image_url = await upload_image(file, folder="akfood/profiles")
     return await service.update_profile_image(current_user.id, image_url)
 
+@router.post("/update-avatar", response_model=schemas.UserRead)
+async def update_avatar_dedicated(file: UploadFile = File(...), current_user=Depends(get_current_user)):
+    """Dedicated new endpoint to update user profile image directly"""
+    from app.db import db
+    image_url = await upload_image(file, folder="akfood/profiles")
+    
+    # Direct database update for maximum reliability
+    updated_user = await db.user.update(
+        where={"id": current_user.id},
+        data={"profile_img_url": image_url}
+    )
+    return updated_user
+
 @router.delete("/account", response_model=schemas.MessageResponse)
 async def delete_account(data: schemas.DeleteAccountRequest, current_user=Depends(get_current_user)):
     """Permanently delete user account"""
