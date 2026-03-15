@@ -36,10 +36,28 @@ class ProductSectionService:
         return response
 
     async def get_all_sections(self):
-        return await db.productsection.find_many(
+        sections = await db.productsection.find_many(
             order={"order_index": "asc"},
-            include={"products": {"include": {"product": True}}}
+            include={
+                "products": {
+                    "include": {
+                        "product": {
+                            "include": {
+                                "variations": True,
+                                "category": True
+                            }
+                        }
+                    }
+                }
+            }
         )
+        
+        # Sort nested products in Python to avoid prisma FieldNotFoundError
+        for section in sections:
+            if section.products:
+                section.products.sort(key=lambda x: x.order_index)
+                
+        return sections
 
     async def create_section(self, data: schemas.ProductSectionCreate):
         return await db.productsection.create(
