@@ -71,3 +71,8 @@ async def update_avatar_dedicated(file: UploadFile = File(...), current_user=Dep
 async def delete_account(data: schemas.DeleteAccountRequest, current_user=Depends(get_current_user)):
     """Permanently delete user account"""
     return await service.delete_account(current_user.id, data)
+
+@router.put("/change-password", response_model=schemas.MessageResponse)
+async def change_password(data: schemas.ChangePasswordRequest, current_user=Depends(get_current_user)):
+    """Change user password (requires old password)"""
+    return await service.change_password(current_user.id, data)

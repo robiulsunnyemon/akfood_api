@@ -229,3 +229,11 @@ model Slider {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
+
+model CmsPage {
+  id         Int      @id @default(autoincrement())
+  slug       String   @unique // about-us, privacy-policy, terms-conditions
+  title      String
+  content    String   // Content can be HTML or plain text
+  updated_at DateTime @updatedAt
+}

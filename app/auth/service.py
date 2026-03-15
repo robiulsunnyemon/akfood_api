@@ -20,7 +20,8 @@ from .schemas import (
     TokenResponse,
     UserRead,
     MessageResponse,
-    GoogleLoginRequest
+    GoogleLoginRequest,
+    ChangePasswordRequest
 )
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
@@ -258,4 +259,23 @@ async def update_profile_image(user_id: int, image_url: str) -> UserRead:
         data={"profile_img_url": image_url}
     )
     return updated_user
+
+async def change_password(user_id: int, data: ChangePasswordRequest) -> MessageResponse:
+    user = await db.user.find_unique(where={"id": user_id})
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        
+    if not verify_password(data.old_password, user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
+        
+    if data.new_password != data.confirm_new_password:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="New passwords do not match")
+        
+    hashed_pw = get_password_hash(data.new_password)
+    await db.user.update(
+        where={"id": user_id},
+        data={"hashed_password": hashed_pw}
+    )
+    
+    return MessageResponse(message="Password changed successfully")
 

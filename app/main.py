@@ -11,6 +11,7 @@ from app.delivery_area.routers import router as delivery_area_router
 from app.delivery_fee.routers import router as delivery_fee_router
 from app.order.routers import router as order_router
 from app.review.routers import router as review_router
+from app.cms.routers import router as cms_router
 from app.payment.routers import router as payment_router
 from app.dashboard.routers import router as dashboard_router
 from app.slider.routers import router as slider_router
@@ -55,6 +56,7 @@ app.include_router(delivery_area_router)
 app.include_router(delivery_fee_router)
 app.include_router(order_router)
 app.include_router(review_router)
+app.include_router(cms_router)
 app.include_router(payment_router)
 app.include_router(dashboard_router)
 app.include_router(slider_router)

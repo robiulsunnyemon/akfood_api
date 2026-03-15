@@ -36,6 +36,11 @@ class ProfileUpdateRequest(BaseModel):
     city: Optional[str] = None
     address: Optional[str] = None
 
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str = Field(min_length=6)
+    confirm_new_password: str
+
 class DeleteAccountRequest(BaseModel):
     password: str
 
