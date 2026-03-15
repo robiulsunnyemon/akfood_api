@@ -45,6 +45,16 @@ async def update_user_profile(user_id: int, update_data: UserUpdateProfileReques
         }
     )
     
+    # Add notification
+    await db.notification.create(
+        data={
+            "user_id": user_id,
+            "title": "Profile Updated",
+            "message": "Your profile information has been successfully updated.",
+            "type": "PROFILE"
+        }
+    )
+    
     return updated_user
 
 async def update_profile_image(user_id: int, file: UploadFile):
@@ -56,6 +66,16 @@ async def update_profile_image(user_id: int, file: UploadFile):
     updated_user = await db.user.update(
         where={"id": user_id},
         data={"profile_img_url": secure_url}
+    )
+    
+    # Add notification
+    await db.notification.create(
+        data={
+            "user_id": user_id,
+            "title": "Profile Picture Updated",
+            "message": "Your profile picture has been successfully updated.",
+            "type": "PROFILE"
+        }
     )
     
     return updated_user

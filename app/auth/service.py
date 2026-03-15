@@ -76,6 +76,16 @@ async def signup(user_data: SignUpRequest) -> TokenResponse:
         }
     )
 
+    # Add notification
+    await db.notification.create(
+        data={
+            "user_id": new_user.id,
+            "title": "Welcome to Al-Khalifa Food!",
+            "message": "Your account has been successfully created. We are glad to have you here!",
+            "type": "ACCOUNT"
+        }
+    )
+
     access_token = create_access_token(data={"sub": str(new_user.id)})
     return TokenResponse(access_token=access_token, user=new_user)
 
@@ -221,6 +231,16 @@ async def google_login(data: GoogleLoginRequest) -> TokenResponse:
                 # Other fields can be updated later by the user
             }
         )
+        
+        # Add notification
+        await db.notification.create(
+            data={
+                "user_id": user.id,
+                "title": "Welcome to Al-Khalifa Food!",
+                "message": "Your account has been successfully created via Google Login.",
+                "type": "ACCOUNT"
+            }
+        )
     
     access_token = create_access_token(data={"sub": str(user.id)})
     return TokenResponse(access_token=access_token, user=user)
@@ -235,6 +255,17 @@ async def update_profile(user_id: int, data: ProfileUpdateRequest) -> UserRead:
         where={"id": user_id},
         data=update_data
     )
+    
+    # Add notification
+    await db.notification.create(
+        data={
+            "user_id": user_id,
+            "title": "Profile Updated",
+            "message": "Your profile information has been successfully updated.",
+            "type": "PROFILE"
+        }
+    )
+    
     return updated_user
 
 async def delete_account(user_id: int, data: DeleteAccountRequest) -> MessageResponse:
@@ -258,6 +289,17 @@ async def update_profile_image(user_id: int, image_url: str) -> UserRead:
         where={"id": user_id},
         data={"profile_img_url": image_url}
     )
+    
+    # Add notification
+    await db.notification.create(
+        data={
+            "user_id": user_id,
+            "title": "Profile Picture Updated",
+            "message": "Your profile picture has been successfully updated.",
+            "type": "PROFILE"
+        }
+    )
+    
     return updated_user
 
 async def change_password(user_id: int, data: ChangePasswordRequest) -> MessageResponse:

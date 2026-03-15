@@ -28,6 +28,12 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum NotificationType {
+  ORDER
+  PROFILE
+  ACCOUNT
+}
+
 model User {
   id              Int      @id @default(autoincrement())
   first_name      String
@@ -44,6 +50,7 @@ model User {
   cart_items      CartItem[]
   orders          Order[]
   reviews         Review[]
+  notifications   Notification[]
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }
@@ -183,6 +190,19 @@ model Review {
   rating     Int      @default(5)
   comment    String?
   created_at DateTime @default(now())
+}
+
+model Notification {
+  id         Int              @id @default(autoincrement())
+  user_id    Int
+  user       User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  title      String
+  message    String
+  type       NotificationType @default(ORDER)
+  is_read    Boolean          @default(false)
+  created_at DateTime         @default(now())
+
+  @@index([user_id])
 }
 
 model OrderItem {

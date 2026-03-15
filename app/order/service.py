@@ -84,6 +84,16 @@ async def create_order(user_id: int, order_data: dict) -> dict:
             include={"items": True}
         )
         
+        # Add notification
+        await transaction.notification.create(
+            data={
+                "user_id": user_id,
+                "title": "Order Placed Successfully",
+                "message": f"Your order #{new_order.id} has been placed. Current status: PENDING.",
+                "type": "ORDER"
+            }
+        )
+        
         # 5. Clear Cart — only for Cash payments.
         # For Digital Payments, the cart will be cleared AFTER payment is confirmed.
         # This prevents cart loss when payment fails or is cancelled.
@@ -159,6 +169,18 @@ async def update_order_status(order_id: int, status: str) -> Optional[dict]:
         data={"status": status},
         include={"items": True, "review": True}
     )
+    
+    if updated:
+        # Add notification
+        await db.notification.create(
+            data={
+                "user_id": updated.user_id,
+                "title": f"Order {status}",
+                "message": f"Your order #{order_id} status has been updated to {status}.",
+                "type": "ORDER"
+            }
+        )
+        
     return updated.model_dump() if updated else None
 
 async def delete_order(order_id: int) -> bool:
