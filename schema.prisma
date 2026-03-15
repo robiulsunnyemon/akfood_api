@@ -88,6 +88,7 @@ model Product {
   rating           Float              @default(5.0)
   review_count     Int                @default(0)
   is_active        Boolean            @default(true)
+  sections         SectionProduct[]
   created_at       DateTime           @default(now())
   updated_at       DateTime           @updatedAt
 }
@@ -256,4 +257,28 @@ model CmsPage {
   title      String
   content    String   // Content can be HTML or plain text
   updated_at DateTime @updatedAt
+}
+
+model ProductSection {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  order_index Int              @default(0)
+  is_active   Boolean          @default(true)
+  products    SectionProduct[]
+  created_at  DateTime         @default(now())
+  updated_at  DateTime         @updatedAt
+}
+
+model SectionProduct {
+  id          Int            @id @default(autoincrement())
+  section_id  Int
+  section     ProductSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
+  product_id  Int
+  product     Product        @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  order_index Int            @default(0)
+  created_at  DateTime       @default(now())
+
+  @@unique([section_id, product_id])
+  @@index([section_id])
+  @@index([product_id])
 }

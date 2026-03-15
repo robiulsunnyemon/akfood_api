@@ -2,8 +2,10 @@ from app.db import db
 from . import schemas
 from fastapi import HTTPException, status
 
-async def get_all_products(skip: int = 0, take: int = 21):
+async def get_all_products(skip: int = 0, take: int = 21, section_id: int = None):
     where_input = {"is_active": True}
+    if section_id:
+        where_input["sections"] = {"some": {"section_id": section_id}}
     total = await db.product.count(where=where_input)
     items = await db.product.find_many(
         where=where_input,

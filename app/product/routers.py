@@ -9,10 +9,10 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=schemas.PaginatedProductResponse)
-async def get_products(page: int = 1, size: int = 21):
+async def get_products(page: int = 1, size: int = 21, section_id: int = None):
     """Get foods with pagination"""
     skip = (page - 1) * size
-    result = await service.get_all_products(skip=skip, take=size)
+    result = await service.get_all_products(skip=skip, take=size, section_id=section_id)
     return {
         "items": result["items"],
         "total": result["total"],

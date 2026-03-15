@@ -16,6 +16,7 @@ from app.payment.routers import router as payment_router
 from app.dashboard.routers import router as dashboard_router
 from app.slider.routers import router as slider_router
 from app.notification_box.routers import router as notification_router
+from app.product_section.routers import router as product_section_router
 import logging
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -62,6 +63,7 @@ app.include_router(payment_router)
 app.include_router(dashboard_router)
 app.include_router(slider_router)
 app.include_router(notification_router)
+app.include_router(product_section_router)
 
 @app.get("/")
 def read_root():
