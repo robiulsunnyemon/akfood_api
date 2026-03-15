@@ -32,7 +32,7 @@ class ProductSectionUpdate(BaseModel):
 
 class ProductSectionRead(ProductSectionBase):
     id: int
-    products: List[SectionProductRead]
+    products: Optional[List[SectionProductRead]] = None
     created_at: datetime
     updated_at: datetime
 
