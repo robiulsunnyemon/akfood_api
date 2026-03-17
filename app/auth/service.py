@@ -101,6 +101,12 @@ async def login(login_data: LoginRequest) -> TokenResponse:
     if not user or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Your account has been deactivated. Please contact support."
+        )
+    
     access_token = create_access_token(data={"sub": str(user.id)})
     return TokenResponse(access_token=access_token, user=user)
 
@@ -196,6 +202,13 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     user = await db.user.find_unique(where={"id": user_id})
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Account is deactivated"
+        )
+        
     return user
 
 async def get_admin_user(current_user = Depends(get_current_user)):
@@ -276,13 +289,13 @@ async def delete_account(user_id: int, data: DeleteAccountRequest) -> MessageRes
     if not verify_password(data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password")
         
-    # Option 1: Deactivate account (soft delete)
-    # await db.user.update(where={"id": user_id}, data={"is_active": False})
+    # Deactivate account (soft delete)
+    await db.user.update(
+        where={"id": user_id}, 
+        data={"is_active": False}
+    )
     
-    # Option 2: Permanent deletion (requested "permanently Delete your account" in screenshot)
-    await db.user.delete(where={"id": user_id})
-    
-    return MessageResponse(message="Account deleted successfully")
+    return MessageResponse(message="Account deactivated successfully")
 
 async def update_profile_image(user_id: int, image_url: str) -> UserRead:
     updated_user = await db.user.update(
